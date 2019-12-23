@@ -1,6 +1,7 @@
 """ Search cell """
 import os
 import torch
+import time
 import torch.nn as nn
 import numpy as np
 from tensorboardX import SummaryWriter
@@ -9,7 +10,7 @@ import utils
 from models.search_cnn import SearchCNNController
 from architect import Architect
 from visualize import plot
-
+from timebudget import timebudget
 
 config = SearchConfig()
 
@@ -25,6 +26,8 @@ config.print_params(logger.info)
 
 def main():
     logger.info("Logger is set - training start")
+    timebudget.set_quiet(True)
+    timebudget.set_show_all_stats(True)
 
     # set default gpu device id
     torch.cuda.set_device(config.gpus[0])
@@ -131,6 +134,7 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr
         alpha_optim.zero_grad()
         architect.unrolled_backward(trn_X, trn_y, val_X, val_y, lr, w_optim)
         alpha_optim.step()
+        timebudget.report(reset=True)
 
         # phase 1. child network step (w)
         w_optim.zero_grad()

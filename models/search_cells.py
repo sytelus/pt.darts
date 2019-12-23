@@ -2,6 +2,7 @@
 import torch
 import torch.nn as nn
 from models import ops
+from timebudget import timebudget
 
 
 class SearchCell(nn.Module):

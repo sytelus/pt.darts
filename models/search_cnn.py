@@ -7,6 +7,8 @@ import genotypes as gt
 from torch.nn.parallel._functions import Broadcast
 import logging
 
+from timebudget import timebudget
+
 
 def broadcast_list(l, device_ids):
     """ Broadcasting list """

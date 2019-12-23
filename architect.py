@@ -1,7 +1,8 @@
 """ Architect controls architecture of cell by computing gradients of alphas """
 import copy
 import torch
-
+import time
+import timebudget
 
 class Architect():
     """ Compute gradients of alphas """
@@ -55,8 +56,11 @@ class Architect():
             xi: learning rate for virtual gradient step (same as net lr)
             w_optim: weights optimizer - for virtual step
         """
+
+        t = time.time()
         # do virtual step (calc w`)
         self.virtual_step(trn_X, trn_y, xi, w_optim)
+        t = time.time()
 
         # calc unrolled loss
         loss = self.v_net.loss(val_X, val_y) # L_val(w`)
