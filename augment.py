@@ -7,7 +7,7 @@ from tensorboardX import SummaryWriter
 from config import AugmentConfig
 import utils
 from models.augment_cnn import AugmentCNN
-
+from timebudget import timebudget
 
 config = AugmentConfig()
 
@@ -84,13 +84,16 @@ def main():
             is_best = True
         else:
             is_best = False
+
+        timebudget.report()
+
         utils.save_checkpoint(model, config.path, is_best)
 
         print("")
 
     logger.info("Final best Prec@1 = {:.4%}".format(best_top1))
 
-
+@timebudget
 def train(train_loader, model, optimizer, criterion, epoch):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
@@ -137,6 +140,7 @@ def train(train_loader, model, optimizer, criterion, epoch):
     logger.info("Train: [{:3d}/{}] Final Prec@1 {:.4%}".format(epoch+1, config.epochs, top1.avg))
 
 
+@timebudget
 def validate(valid_loader, model, criterion, epoch, cur_step):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()

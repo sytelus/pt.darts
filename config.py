@@ -70,7 +70,7 @@ class SearchConfig(BaseConfig):
         args = parser.parse_args()
         super().__init__(**vars(args))
 
-        self.data_path = os.path.expanduser('~/torchvision_data_dir')
+        self.data_path = os.path.expanduser('~/dataroot')
         self.path = os.path.join(os.path.expanduser('~/logdir'), self.name)
         os.makedirs(self.path, exist_ok=True)
         self.plot_path = os.path.join(self.path, 'plots')
@@ -88,7 +88,7 @@ class AugmentConfig(BaseConfig):
         parser.add_argument('--weight_decay', type=float, default=3e-4, help='weight decay')
         parser.add_argument('--grad_clip', type=float, default=5.,
                             help='gradient clipping for weights')
-        parser.add_argument('--print_freq', type=int, default=1, help='print frequency')
+        parser.add_argument('--print_freq', type=int, default=10000, help='print frequency')
         parser.add_argument('--gpus', default='0', help='gpu device ids separated by comma. '
                             '`all` indicates use all gpus.')
         parser.add_argument('--epochs', type=int, default=600, help='# of training epochs')
@@ -114,7 +114,7 @@ class AugmentConfig(BaseConfig):
         args = parser.parse_args()
         super().__init__(**vars(args))
 
-        self.data_path = os.path.expanduser('~/torchvision_data_dir')
+        self.data_path = os.path.expanduser('~/dataroot')
         self.path = os.path.join(os.path.expanduser('~/logdir'), self.name)
         os.makedirs(self.path, exist_ok=True)
         self.genotype = gt.from_str(self.genotype)
