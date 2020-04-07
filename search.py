@@ -26,8 +26,6 @@ config.print_params(logger.info)
 
 def main():
     logger.info("Logger is set - training start")
-    timebudget.set_quiet(True)
-    timebudget.set_show_all_stats(True)
 
     # set default gpu device id
     torch.cuda.set_device(config.gpus[0])
@@ -96,10 +94,10 @@ def main():
         logger.info("genotype = {}".format(genotype))
 
         # genotype as a image
-        plot_path = os.path.join(config.plot_path, "EP{:02d}".format(epoch+1))
-        caption = "Epoch {}".format(epoch+1)
-        plot(genotype.normal, plot_path + "-normal", caption)
-        plot(genotype.reduce, plot_path + "-reduce", caption)
+        # plot_path = os.path.join(config.plot_path, "EP{:02d}".format(epoch+1))
+        # caption = "Epoch {}".format(epoch+1)
+        # plot(genotype.normal, plot_path + "-normal", caption)
+        # plot(genotype.reduce, plot_path + "-reduce", caption)
 
         # save
         if best_top1 < top1:
@@ -108,13 +106,16 @@ def main():
             is_best = True
         else:
             is_best = False
-        utils.save_checkpoint(model, config.path, is_best)
+        #utils.save_checkpoint(model, config.path, is_best)
         print("")
+
+        timebudget.report()
 
     logger.info("Final best Prec@1 = {:.4%}".format(best_top1))
     logger.info("Best Genotype = {}".format(best_genotype))
 
 
+@timebudget
 def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr, epoch):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
@@ -134,7 +135,6 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr
         alpha_optim.zero_grad()
         architect.unrolled_backward(trn_X, trn_y, val_X, val_y, lr, w_optim)
         alpha_optim.step()
-        timebudget.report(reset=True)
 
         # phase 1. child network step (w)
         w_optim.zero_grad()
@@ -150,21 +150,22 @@ def train(train_loader, valid_loader, model, architect, w_optim, alpha_optim, lr
         top1.update(prec1.item(), N)
         top5.update(prec5.item(), N)
 
-        if step % config.print_freq == 0 or step == len(train_loader)-1:
+        if (step+1) % config.print_freq == 0 or step == len(train_loader)-1:
             logger.info(
                 "Train: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
                 "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
                     epoch+1, config.epochs, step, len(train_loader)-1, losses=losses,
                     top1=top1, top5=top5))
 
-        writer.add_scalar('train/loss', loss.item(), cur_step)
-        writer.add_scalar('train/top1', prec1.item(), cur_step)
-        writer.add_scalar('train/top5', prec5.item(), cur_step)
+            writer.add_scalar('train/loss', loss.item(), cur_step)
+            writer.add_scalar('train/top1', prec1.item(), cur_step)
+            writer.add_scalar('train/top5', prec5.item(), cur_step)
         cur_step += 1
 
     logger.info("Train: [{:2d}/{}] Final Prec@1 {:.4%}".format(epoch+1, config.epochs, top1.avg))
 
 
+@timebudget
 def validate(valid_loader, model, epoch, cur_step):
     top1 = utils.AverageMeter()
     top5 = utils.AverageMeter()
@@ -185,7 +186,7 @@ def validate(valid_loader, model, epoch, cur_step):
             top1.update(prec1.item(), N)
             top5.update(prec5.item(), N)
 
-            if step % config.print_freq == 0 or step == len(valid_loader)-1:
+            if (step+1) % config.print_freq == 0 or step == len(valid_loader)-1:
                 logger.info(
                     "Valid: [{:2d}/{}] Step {:03d}/{:03d} Loss {losses.avg:.3f} "
                     "Prec@(1,5) ({top1.avg:.1%}, {top5.avg:.1%})".format(
